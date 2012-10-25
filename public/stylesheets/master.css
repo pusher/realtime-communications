@@ -1,0 +1,55 @@
+/* @override http://localhost:3000/stylesheets/master.css */
+
+.twilio-number {
+	background-color: #EEE;
+	margin-bottom: 1em;
+}
+
+.twilio-number h2 {
+	font-size: 3em;
+	text-align: center;
+}
+
+.left-header {
+	background-color: #DCEAF4;
+}
+
+.left-header > p, .left-header h1 {
+	background-color: #DCEAF4;
+	padding: 5px;
+}
+
+body {
+  padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+
+@media (max-width: 979px) {
+	body {
+		padding-top: 0;
+	}
+}
+
+.left-header h1 {
+}
+
+.left-header .logo {
+	float: right;
+	/*width: 70px;*/
+	-webkit-transform:rotate(20deg);
+	-moz-transform:rotate(20deg);
+	-o-transform:rotate(20deg);
+	/* filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=1.5); */
+	-ms-transform:rotate(20deg);
+}
+
+#news_content {
+	width: 90%;
+}
+
+.news-article {
+	border-bottom: 1px solid #DDD;
+}
+
+#chat_message, #twitter_id {
+	width: 150px;
+}

@@ -1,0 +1,19 @@
+development:
+  reset_password: your_reset_password
+  event_name: twilio2012
+  username: pusher
+  password: your_speaker_only_pwd
+  twilio_number: 
+  twilio_account_sid: 
+  twilio_auth_token: 
+  news_secret: your_speaker_only_pwd
+
+production:
+  reset_password: your_reset_password
+  event_name: twilio2012
+  username: pusher
+  password: your_speaker_only_pwd
+  twilio_number: 
+  twilio_account_sid: 
+  twilio_auth_token: 
+  news_secret: your_speaker_only_pwd

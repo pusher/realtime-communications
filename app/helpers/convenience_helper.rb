@@ -1,0 +1,2 @@
+module ConvenienceHelper
+end

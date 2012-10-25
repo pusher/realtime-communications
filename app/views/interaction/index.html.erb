@@ -1,0 +1,127 @@
+<div class="container">
+
+	<div class="row">
+		<div class="span12 twilio-number">
+			<h2><%= @twilio_number %></h2>
+		</div>
+	</div>
+
+	<div class="row">
+	  <div class="span4 left-header">
+	  	<img class="logo" src="/images/phil_head.png" width="75" alt="Phil's Head" />
+		  <h1>Cross Platform Chat</h1>
+		  <p>By sending a text it will appear in this web view.</p>
+		  <p>To stop things from getting crazy no text messages will be sent other than the initial text with link to the web view.</p>
+	  </div>
+
+		<div class="span3">
+
+			<h2>Chat</h2>
+
+	  	<form id="chat_form" action="/interaction/chat" method="post">
+			  <textarea rows="5" id="chat_message"></textarea>
+			  <label>Twitter ID:</label><input type="text" id="twitter_id" name="twitter_id" />
+				<div class="control-group">			  
+			  	<button type="submit" class="btn">Submit</button>
+				</div>
+			</form>
+
+	  </div>
+	  
+	  <div class="span5">
+
+	  	<h2>Messages</h2>
+	  	
+	  	<table class="table table-striped" id="messages">
+		    <thead>
+		      <tr>
+		        <th>Twitter ID</th>
+		        <th>Medium (SMS/Web)</th>
+		        <th>Message</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+		    </tbody>
+		  </table>
+
+	  </div>
+	</div>
+
+</div> <!-- /container -->
+
+<script src="http://js.pusher.com/1.12/pusher.min.js"></script>
+<script>
+	Pusher.log = function( msg ) {
+		if( window.console && window.console.log ) {
+			console.log( msg );
+		}
+	};
+
+	$(init);
+
+	var pusher,
+	    tableBody;
+
+	function init() {
+
+		chatForm = $( '#chat_form' );
+		chatForm.submit( submitChat );
+
+		tableBody = $( '#messages tbody' );
+
+	  pusher = new Pusher( "<%= @pusher_key %>", { encrypted: true } );
+	  var channel = pusher.subscribe( 'chat' );
+	  channel.bind( 'new_message', messageReceived );
+	}
+
+	function submitChat() {
+		var form = $( this );
+		var text = $.trim( $( '#chat_message' ).val() );
+		var twitterId = $.trim( $( '#twitter_id' ).val() );
+
+		var csrfParam = $( 'meta[name=csrf-param]' ).attr('content');
+		var csrfToken = $( 'meta[name=csrf-token]' ).attr('content')
+		var data = {};
+		data['text'] = text;
+		data[csrfParam] = csrfToken;
+		data['twitter_id'] = twitterId;
+
+		$.ajax( {
+			url: form.attr( 'action' ),
+			type: form.attr( 'method' ),
+			data: data
+		})
+
+		return false;
+	}
+
+  function messageReceived( data ) {
+  	var html = '' +
+  	'<tr>' +
+      '<td class="twitter-id"></td>' +
+      '<td>' +
+      	data.medium + ( data.from? ' (...' + data.from.substr(-5) + ')' : '' ) +
+      '</td>' +
+      '<td class="message-text"></td>' +
+    '</tr>';
+    
+    var tr = $( html );
+    
+    if( data.twitter_id ) {
+	    var twitterEl = tr.find( '.twitter-id' );
+	    twitterEl.text( data.twitter_id );
+	    var textTwitterId = twitterEl.text();
+	    var twitterHtml = '<img src="http://api.twitter.com/1/users/profile_image?screen_name=' +
+	    									textTwitterId + '" />' +
+	    									'<br />' +
+	    									'<a href="http://twitter.com/">' + textTwitterId + '</a>';
+	    twitterEl.html( twitterHtml );
+	  }
+
+    tr.find('.message-text').text( data.text )
+
+    tr.hide();
+    tableBody.prepend(tr);
+    tr.slideDown();
+  }
+</script>

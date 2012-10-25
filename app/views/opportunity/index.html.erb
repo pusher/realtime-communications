@@ -1,0 +1,85 @@
+<div class="container">
+
+	<div class="row">
+		<div class="span12 twilio-number">
+			<h2><%= @twilio_number %></h2>
+		</div>
+	</div>
+
+	<div class="row">
+	  <div class="span4 left-header">
+	  	<img class="logo" src="/images/trophy.png" width="75" alt="Trophy" />
+		  <h1>Text 2 Win!</h1>
+		  <p>Text the number above. <strong>Include your Twitter ID in the text message body</strong>.</p>
+	  </div>
+	  <div class="span8">
+
+			<table class="table table-striped" id="sms_received">
+		    <thead>
+		      <tr>
+		        <th>#</th>
+		        <th>Twitter ID</th>
+		        <th>Number (partial)</th>
+		        <th>Prize</th>
+		      </tr>
+		    </thead>
+		    <tbody>
+		<!--                 <tr>
+		        <td>1</td>
+		        <td>Mark</td>
+		        <td>Otto</td>
+		        <td>@mdo</td>
+		      </tr> -->
+		    </tbody>
+		  </table>
+
+	  </div>
+	</div>
+
+</div> <!-- /container -->
+
+<script src="http://js.pusher.com/1.12/pusher.min.js"></script>
+<script>
+	Pusher.log = function( msg ) {
+		if( window.console && window.console.log ) {
+			console.log( msg );
+		}
+	};
+
+	$(init);
+
+	var pusher,
+	    tableBody;
+
+	function init() {
+		tableBody = $( '#sms_received tbody' );
+
+	  pusher = new Pusher( "<%= @pusher_key %>", { encrypted: true } );
+	  var channel = pusher.subscribe( 'opportunity' );
+	  channel.bind( 'sms_received', smsReceived );
+	}
+
+  function smsReceived( data ) {
+  	var count = tableBody.find( 'tr' ).size();
+  	var html = '' +
+  	'<tr>' +
+      '<td>' + ( count + 1 ) + '</td>' +
+      '<td class="twitter-id"></td>' +
+      '<td>...' + data.sms.from.substr(-5) + '</td>' +
+      '<td>' + (data.prize? data.prize.name : 'Sorry, too late!') + '</td>' +
+    '</tr>';
+    var tr = $( html );
+    var twitterEl = tr.find( '.twitter-id' );
+    twitterEl.text( data.twitter_id );
+    var textTwitterId = twitterEl.text();
+    var twitterHtml = '<img src="http://api.twitter.com/1/users/profile_image?screen_name=' +
+    									textTwitterId + '&size=bigger" />' +
+    									'<br />' +
+    									'<a href="http://twitter.com/">' + textTwitterId + '</a>';
+    twitterEl.html( twitterHtml );
+
+    tr.hide();
+    tableBody.append(tr);
+    tr.slideDown();
+  }
+</script>

@@ -1,0 +1,95 @@
+<div class="container">
+
+	<div class="row">
+	  <div class="span4 left-header">
+	  	<img class="logo" src="/images/news.png" width="135" alt="Breaking News!" />
+		  <h1>Breaking<br />News!</h1>
+	  </div>
+
+	 	<div class="span4">
+
+			<h2>Break some news!</h2>
+
+	  	<form id="news_form" action="/convenience/news" method="post">
+			  <textarea rows="5" id="news_content"></textarea>
+			  <label><small>News content (Markdown)</small></label>
+			  <label>Publisher secret:</label><input type="password" id="news_secret" name="news_secret" />
+				<div class="control-group">			  
+			  	<button type="submit" class="btn">Submit</button>
+				</div>
+			</form>
+
+	  </div>
+	  
+	  <div class="span4">
+
+	  	<h2>Live news stream</h2>
+	  	<div id="breaking_news"></div>
+
+	  </div>
+	</div>
+
+</div> <!-- /container -->
+
+<script src="/javascripts/showdown.js"></script>
+<script src="http://js.pusher.com/1.12/pusher.min.js"></script>
+<script>
+	Pusher.log = function( msg ) {
+		if( window.console && window.console.log ) {
+			console.log( msg );
+		}
+	};
+
+	$(init);
+
+	var pusher,
+	    newsEl,
+	    newsForm;
+
+	function init() {
+
+		newsForm = $( '#news_form' );
+		newsForm.submit( submitNews );
+
+		newsEl = $( '#breaking_news' );
+
+	  pusher = new Pusher( "<%= @pusher_key %>", { encrypted: true } );
+	  var channel = pusher.subscribe( 'breaking-news' );
+	  channel.bind( 'new_article_received', newsReceived );
+	}
+
+	function submitNews() {
+		var form = $( this );
+		var text = $.trim( $( '#news_content' ).val() );
+
+		var csrfParam = $( 'meta[name=csrf-param]' ).attr('content');
+		var csrfToken = $( 'meta[name=csrf-token]' ).attr('content')
+		var data = {};
+		data['text'] = text;
+		data[csrfParam] = csrfToken;
+		data['news_secret'] = $( '#news_secret' ).val();
+
+		$.ajax( {
+			url: form.attr( 'action' ),
+			type: form.attr( 'method' ),
+			data: data
+		})
+
+		return false;
+	}
+
+  function newsReceived( data ) {
+  	var converter = new Showdown.converter();
+		var articleHtml = converter.makeHtml(data.text);
+
+  	var html = '' +
+  	'<div class="news-article">' +
+      articleHtml +
+    '</div>';
+    var articleEl = $( html );
+
+    articleEl.hide();
+    newsEl.prepend( articleEl );
+    articleEl.slideDown();
+  }
+</script>
